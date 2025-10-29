@@ -1,29 +1,58 @@
 {
   "expo": {
-    "name": "dance-class-app",
-    "slug": "dance-class-app",
+    "name": "ClassConnect",
+    "slug": "class-connect",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#007AFF"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.classconnect.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSMotionUsageDescription": "This app does not use motion or fitness data.",
+        "NSCameraUsageDescription": "This app needs access to camera to take profile pictures.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select profile pictures.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+      "package": "com.classconnect.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "bundler": "metro"
+    },
+    "sdkVersion": "54.0.0",
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you select a profile picture.",
+          "cameraPermission": "The app accesses your camera to let you take a profile picture."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6132ef89-ada5-4073-9291-96ecff715560"
+      }
+    },
+    "owner": "sidsinha27"
   }
 }

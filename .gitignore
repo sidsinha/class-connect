@@ -18,6 +18,17 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# iOS
+ios/
+*.xcworkspace
+*.xcuserstate
+*.xcodeproj/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
 # Metro
 .metro-health-check*
 
@@ -32,6 +43,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo

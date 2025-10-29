@@ -1,21 +1,45 @@
 {
-  "name": "dance-class-app",
+  "name": "class-connect",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
-    "expo": "~53.0.17",
-    "expo-status-bar": "~2.2.3",
-    "react": "19.0.0",
-    "react-native": "0.79.5"
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "8.4.4",
+    "@react-navigation/native": "^7.1.19",
+    "@react-navigation/stack": "^7.6.0",
+    "expo": "54.0.21",
+    "expo-image-picker": "^17.0.8",
+    "expo-status-bar": "~3.0.8",
+    "firebase": "^12.4.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-calendars": "^1.1313.0",
+    "react-native-dotenv": "^3.4.11",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-vector-icons": "^10.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
   },
-  "private": true
+  "private": true,
+  "keywords": [
+    "class",
+    "management",
+    "attendance",
+    "instructor",
+    "student",
+    "education",
+    "learning"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "ClassConnect - Smart Class Management App"
 }
