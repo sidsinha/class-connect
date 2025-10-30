@@ -11,50 +11,89 @@ import {
 } from 'react-native';
 import authService from '../authService';
 
-export default function EmailVerificationScreen({ onVerificationComplete }) {
+export default function EmailVerificationScreen({ onVerificationComplete, onBackToLogin }) {
   const [isResending, setIsResending] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
 
-  const checkEmailVerification = async () => {
-    try {
-      setIsChecking(true);
+  // Auto-check for email verification every 3 seconds
+  useEffect(() => {
+    const checkInterval = setInterval(async () => {
       const currentUser = authService.getCurrentUser();
-      
       if (currentUser) {
-        // Reload user to get updated emailVerified status
-        await currentUser.reload();
-        
-        if (currentUser.emailVerified) {
-          Alert.alert(
-            'Email Verified!', 
-            'Your email has been successfully verified. You can now access your dashboard.',
-            [{ text: 'Continue', onPress: onVerificationComplete }]
-          );
-        } else {
-          Alert.alert('Not Verified', 'Please check your email and click the verification link.');
+        try {
+          await currentUser.reload();
+          if (currentUser.emailVerified) {
+            clearInterval(checkInterval);
+            onVerificationComplete();
+          }
+        } catch (error) {
+          // Silently handle errors during auto-check
         }
       }
-    } catch (error) {
-      console.error('Error checking verification:', error);
-      Alert.alert('Error', 'Failed to check verification status');
-    } finally {
-      setIsChecking(false);
-    }
-  };
+    }, 3000);
+
+    return () => clearInterval(checkInterval);
+  }, [onVerificationComplete]);
+
 
   const resendVerificationEmail = async () => {
     try {
       setIsResending(true);
+      
+      // Get the current user directly from Firebase auth
+      const currentUser = authService.getCurrentUser();
+      
+      if (!currentUser) {
+        Alert.alert(
+          'Session Error', 
+          'It looks like your session has expired. Please go back to login and try again.'
+        );
+        return;
+      }
+
+      // Check if email is already verified
+      if (currentUser.emailVerified) {
+        Alert.alert(
+          'Already Verified', 
+          'Your email is already verified! You can now access your dashboard.',
+          [{ text: 'Continue', onPress: onVerificationComplete }]
+        );
+        return;
+      }
+
+      // Use authService to send verification email
       const result = await authService.resendVerificationEmail();
       
       if (result.success) {
-        Alert.alert('Email Sent', 'Verification email has been sent to your inbox. Please check your email and spam folder.');
+        Alert.alert(
+          'Email Sent', 
+          'A new verification email has been sent to your inbox. Please check your email and spam folder.'
+        );
       } else {
-        Alert.alert('Error', result.error || 'Failed to send verification email');
+        // Handle specific error cases
+        let errorMessage = result.error || 'Failed to send verification email.';
+        
+        if (result.error.includes('No user logged in')) {
+          errorMessage = 'Session expired. Please go back to login and try again.';
+        } else if (result.error.includes('Email is already verified')) {
+          Alert.alert(
+            'Already Verified', 
+            'Your email is already verified! You can now access your dashboard.',
+            [{ text: 'Continue', onPress: onVerificationComplete }]
+          );
+          return;
+        } else if (result.error.includes('auth/too-many-requests')) {
+          errorMessage = 'Too many attempts. Please wait a few minutes before trying again.';
+        } else if (result.error.includes('auth/network-request-failed')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        }
+        
+        Alert.alert('Error', errorMessage);
       }
     } catch (error) {
-      console.error('Error resending verification:', error);
-      Alert.alert('Error', 'Failed to send verification email');
+      Alert.alert(
+        'Error', 
+        'Failed to send verification email. Please check your internet connection and try again.'
+      );
     } finally {
       setIsResending(false);
     }
@@ -62,15 +101,25 @@ export default function EmailVerificationScreen({ onVerificationComplete }) {
 
   const handleLogout = () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout? You will need to verify your email to access your account.',
+      'Back to Login',
+      'Are you sure you want to go back to login? You can return here anytime to verify your email.',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Stay Here', style: 'cancel' },
         { 
           text: 'Back to Login', 
-          onPress: () => {
-            authService.signOut();
-          }
+            onPress: async () => {
+              try {
+                await authService.signOut();
+                if (onBackToLogin) {
+                  onBackToLogin();
+                }
+              } catch (error) {
+                // Still call the callback even if signOut fails
+                if (onBackToLogin) {
+                  onBackToLogin();
+                }
+              }
+            }
         }
       ]
     );
@@ -96,22 +145,18 @@ export default function EmailVerificationScreen({ onVerificationComplete }) {
         
         <Text style={styles.description}>
           Please check your email and click the verification link to activate your account. 
-          Don't forget to check your spam folder!
+          Don't forget to check your spam folder! Once you click the link, you'll be automatically redirected to your dashboard.
         </Text>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
-            onPress={checkEmailVerification}
-            disabled={isChecking}
-          >
-            {isChecking ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.primaryButtonText}>I've Verified My Email</Text>
-            )}
-          </TouchableOpacity>
+        <View style={styles.tipContainer}>
+          <Text style={styles.tipTitle}>💡 Tip:</Text>
+          <Text style={styles.tipText}>
+            If you don't see the email, try refreshing your email app or check your spam folder. 
+            The verification link will expire in 24 hours.
+          </Text>
+        </View>
 
+        <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
             onPress={resendVerificationEmail}
@@ -219,5 +264,24 @@ const styles = StyleSheet.create({
     color: '#dc3545',
     fontSize: 16,
     fontWeight: '600',
+  },
+  tipContainer: {
+    backgroundColor: '#e3f2fd',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 30,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196f3',
+  },
+  tipTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1976d2',
+    marginBottom: 5,
+  },
+  tipText: {
+    fontSize: 14,
+    color: '#1976d2',
+    lineHeight: 20,
   },
 });

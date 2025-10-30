@@ -6,19 +6,39 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import authService from './authService';
+import OnboardingScreen from './components/OnboardingScreen';
+import RoleSelectionScreen from './components/RoleSelectionScreen';
 import LoginScreen from './components/LoginScreen';
 import StudentDashboard from './components/StudentDashboard';
 import InstructorDashboard from './components/InstructorDashboard';
+import DebugHelper from './components/DebugHelper';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
 
   useEffect(() => {
+    checkOnboardingStatus();
     checkAuthState();
   }, []);
+
+  const checkOnboardingStatus = async () => {
+    try {
+      const hasSeenOnboarding = await AsyncStorage.getItem('hasSeenOnboarding');
+      if (hasSeenOnboarding === 'true') {
+        setShowOnboarding(false);
+        setShowRoleSelection(true);
+      }
+    } catch (error) {
+      console.error('Error checking onboarding status:', error);
+    }
+  };
 
   const checkAuthState = async () => {
     try {
@@ -70,8 +90,69 @@ export default function App() {
     );
   }
 
+  const handleOnboardingComplete = async () => {
+    try {
+      await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+      setShowOnboarding(false);
+      setShowRoleSelection(true);
+    } catch (error) {
+      console.error('Error saving onboarding status:', error);
+      setShowOnboarding(false);
+      setShowRoleSelection(true);
+    }
+  };
+
+  const handleRoleSelected = (role) => {
+    setSelectedRole(role);
+    setShowRoleSelection(false);
+  };
+
+  const handleRoleChange = () => {
+    setShowRoleSelection(true);
+    setSelectedRole(null);
+  };
+
+  // For development/testing - reset onboarding
+  const resetOnboarding = async () => {
+    try {
+      await AsyncStorage.removeItem('hasSeenOnboarding');
+      setShowOnboarding(true);
+      setShowRoleSelection(false);
+      setSelectedRole(null);
+    } catch (error) {
+      console.error('Error resetting onboarding:', error);
+    }
+  };
+
+  if (showOnboarding) {
+    return (
+      <View style={{ flex: 1 }}>
+        <OnboardingScreen onComplete={handleOnboardingComplete} />
+        <DebugHelper onResetOnboarding={resetOnboarding} />
+      </View>
+    );
+  }
+
+  if (showRoleSelection) {
+    return (
+      <View style={{ flex: 1 }}>
+        <RoleSelectionScreen onRoleSelected={handleRoleSelected} />
+        <DebugHelper onResetOnboarding={resetOnboarding} />
+      </View>
+    );
+  }
+
   if (!isAuthenticated) {
-    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <View style={{ flex: 1 }}>
+        <LoginScreen 
+          onLoginSuccess={handleLoginSuccess} 
+          preSelectedRole={selectedRole}
+          onRoleChange={handleRoleChange}
+        />
+        <DebugHelper onResetOnboarding={resetOnboarding} />
+      </View>
+    );
   }
 
   if (userRole === 'student') {
@@ -83,7 +164,12 @@ export default function App() {
   }
 
   // Fallback - should not reach here
-  return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+  return (
+    <View style={{ flex: 1 }}>
+      <LoginScreen onLoginSuccess={handleLoginSuccess} />
+      <DebugHelper onResetOnboarding={resetOnboarding} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

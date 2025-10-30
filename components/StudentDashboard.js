@@ -250,7 +250,7 @@ export default function StudentDashboard({ onLogout }) {
           <TouchableOpacity style={styles.backButton} onPress={() => setShowMessagesScreen(false)}>
             <Text style={styles.backButtonText}>← Back</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{studentName}'s Messages</Text>
+          <Text style={styles.headerTitle}>Student Messages</Text>
           <View style={styles.headerRight} />
         </View>
 
@@ -294,7 +294,7 @@ export default function StudentDashboard({ onLogout }) {
           <TouchableOpacity style={styles.backButton} onPress={() => setShowSchedulesScreen(false)}>
             <Text style={styles.backButtonText}>← Back</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{studentName}'s Schedules</Text>
+          <Text style={styles.headerTitle}>Student Schedules</Text>
           <View style={styles.headerRight} />
         </View>
 
@@ -336,7 +336,7 @@ export default function StudentDashboard({ onLogout }) {
         <View style={styles.headerLeft}>
           <View style={styles.headerLogoContainer}>
             <Text style={styles.headerLogoIcon}>🎓</Text>
-            <Text style={styles.title}>{studentName}'s Dashboard</Text>
+            <Text style={styles.title}>Student Dashboard</Text>
           </View>
           <Text style={styles.subtitle}>View messages from your instructors</Text>
         </View>

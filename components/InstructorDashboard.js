@@ -1178,7 +1178,7 @@ export default function InstructorDashboard({ onLogout }) {
         <View style={styles.headerLeft}>
           <View style={styles.headerLogoContainer}>
             <Text style={styles.headerLogoIcon}>🎓</Text>
-            <Text style={styles.title}>{instructorFirstName}'s Dashboard</Text>
+            <Text style={styles.title}>Instructor Dashboard</Text>
           </View>
           <Text style={styles.subtitle}>Manage classes, students, and attendance</Text>
         </View>

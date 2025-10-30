@@ -51,9 +51,6 @@ class AuthService {
 
       return { success: true, user, emailSent: true };
     } catch (error) {
-      console.error('❌ Sign up error:', error);
-      console.error('❌ Error code:', error.code);
-      console.error('❌ Error message:', error.message);
       return { success: false, error: error.message };
     }
   }
@@ -72,9 +69,6 @@ class AuthService {
 
       return { success: true, user };
     } catch (error) {
-      console.error('❌ Sign in error:', error);
-      console.error('❌ Error code:', error.code);
-      console.error('❌ Error message:', error.message);
       return { success: false, error: error.message };
     }
   }
@@ -86,7 +80,6 @@ class AuthService {
       this.userRole = null;
       return { success: true };
     } catch (error) {
-      console.error('Sign out error:', error);
       return { success: false, error: error.message };
     }
   }
@@ -115,26 +108,49 @@ class AuthService {
     return this.currentUser ? this.currentUser.emailVerified : false;
   }
 
+
   async resendVerificationEmail() {
     try {
-      if (this.currentUser) {
-        await sendEmailVerification(this.currentUser);
-        return { success: true };
+      // Get current user directly from Firebase auth to ensure we have the latest state
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        return { success: false, error: 'No user logged in' };
       }
-      return { success: false, error: 'No user logged in' };
+
+      // Check if email is already verified
+      if (currentUser.emailVerified) {
+        return { success: false, error: 'Email is already verified' };
+      }
+
+      // Send verification email
+      await sendEmailVerification(currentUser);
+      return { success: true };
     } catch (error) {
-      console.error('❌ Resend verification error:', error);
       return { success: false, error: error.message };
     }
   }
 
   async sendPasswordReset(email) {
     try {
+      // Let Firebase handle the email validation directly
+      // This will send the reset email if the email exists, or throw an error if it doesn't
       await sendPasswordResetEmail(auth, email);
       return { success: true };
     } catch (error) {
-      console.error('❌ Password reset error:', error);
-      return { success: false, error: error.message };
+      // Handle specific Firebase errors
+      let errorMessage = error.message;
+      
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email address. Please check your email or sign up for a new account.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many attempts. Please try again later.';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection.';
+      }
+      
+      return { success: false, error: errorMessage };
     }
   }
 }
