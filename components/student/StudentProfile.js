@@ -14,8 +14,8 @@ import {
   Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import dataService from '../dataService';
-import authService from '../authService';
+import dataService from '../../dataService';
+import authService from '../../authService';
 
 export default function StudentProfile({ onBack }) {
   const [profile, setProfile] = useState(null);

@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   SafeAreaView
 } from 'react-native';
-import authService from '../authService';
+import authService from '../../authService';
 
 export default function EmailVerificationScreen({ onVerificationComplete, onBackToLogin }) {
   const [isResending, setIsResending] = useState(false);

@@ -6,7 +6,10 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "lint:imports": "eslint . --ext .js,.jsx --rule 'import/no-unresolved: error'"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -29,6 +32,14 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@react-native/eslint-config": "^0.82.1",
+    "eslint": "^8.57.1",
+    "eslint-import-resolver-react-native": "^0.2.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-native": "^5.0.0",
     "react-native-debugger": "^1.1.0"
   },
   "private": true,

@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+**/node_modules/**
+
+# Build outputs
+build/
+dist/
+.expo/
+.expo-shared/
+ios/
+android/
+web-build/
+
+# Generated files
+*.generated.js
+coverage/
+
+# Config files
+*.config.js
+babel.config.js
+metro.config.js
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+
+# Environment files
+.env
+.env.*
+
+# Temporary files
+*.tmp
+*.temp
+

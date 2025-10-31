@@ -8,12 +8,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import authService from './authService';
-import OnboardingScreen from './components/OnboardingScreen';
-import RoleSelectionScreen from './components/RoleSelectionScreen';
-import LoginScreen from './components/LoginScreen';
+import OnboardingScreen from './components/onboarding/OnboardingScreen';
+import RoleSelectionScreen from './components/auth/RoleSelectionScreen';
+import LoginScreen from './components/auth/LoginScreen';
 import StudentDashboard from './components/StudentDashboard';
 import InstructorDashboard from './components/InstructorDashboard';
-import DebugHelper from './components/DebugHelper';
+import DebugHelper from './components/common/DebugHelper';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

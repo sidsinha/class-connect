@@ -13,7 +13,7 @@ import {
   Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import authService from '../authService';
+import authService from '../../authService';
 import EmailVerificationScreen from './EmailVerificationScreen';
 
 export default function LoginScreen({ onLoginSuccess, preSelectedRole = null, onRoleChange = null }) {
@@ -301,7 +301,7 @@ export default function LoginScreen({ onLoginSuccess, preSelectedRole = null, on
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.header}>
               <View style={styles.logoSection}>
-                <Image source={require('../assets/logo.png')} style={styles.logoIcon} />
+                <Image source={require('../../assets/logo.png')} style={styles.logoIcon} />
               </View>
               <Text style={styles.title}>Reset Password</Text>
               <Text style={styles.subtitle}>
@@ -366,7 +366,7 @@ export default function LoginScreen({ onLoginSuccess, preSelectedRole = null, on
           <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.header}>
               <View style={styles.logoSection}>
-                <Image source={require('../assets/logo.png')} style={styles.logoIcon} />
+                <Image source={require('../../assets/logo.png')} style={styles.logoIcon} />
               </View>
               <Text style={styles.title}>Resend Verification</Text>
               <Text style={styles.subtitle}>
@@ -429,7 +429,7 @@ export default function LoginScreen({ onLoginSuccess, preSelectedRole = null, on
         <View style={styles.header}>
           <View style={styles.logoSection}>
             <View style={styles.logoContainer}>
-              <Image source={require('../assets/logo.png')} style={styles.logoIcon} />
+              <Image source={require('../../assets/logo.png')} style={styles.logoIcon} />
             </View>
             <Text style={styles.title}>ClassConnect Pro</Text>
             <Text style={styles.subtitle}>

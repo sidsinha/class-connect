@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -11,15 +11,14 @@ import {
   Modal,
   RefreshControl,
   Platform,
-  ScrollView,
-  Image
+  ScrollView
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
 import dataService from '../dataService';
 import authService from '../authService';
-import InstructorProfile from './InstructorProfile';
+import InstructorProfile from './instructor/InstructorProfile';
 
 export default function InstructorDashboard({ onLogout }) {
   const [classes, setClasses] = useState([]);
@@ -50,7 +49,7 @@ export default function InstructorDashboard({ onLogout }) {
   const [newClassName, setNewClassName] = useState('');
   const [newClassDescription, setNewClassDescription] = useState('');
   const [instructorName, setInstructorName] = useState('Instructor');
-  const [instructorFirstName, setInstructorFirstName] = useState('Instructor');
+  const [_instructorFirstName, setInstructorFirstName] = useState('Instructor');
   
   // Schedule states
   const [schedules, setSchedules] = useState([]);
@@ -86,7 +85,8 @@ export default function InstructorDashboard({ onLogout }) {
 
   useEffect(() => {
     loadInstructorData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // loadInstructorData is stable and doesn't need to be in deps
 
   // Filter students based on search query
   useEffect(() => {
@@ -269,7 +269,7 @@ export default function InstructorDashboard({ onLogout }) {
   };
 
   // Schedule management functions
-  const loadSchedules = async (classId) => {
+  const _loadSchedules = async (classId) => {
     try {
       const classSchedules = await dataService.getSchedules(classId);
       setSchedules(classSchedules);
@@ -299,7 +299,7 @@ export default function InstructorDashboard({ onLogout }) {
         date: formattedDate,
         startTime: formatTime(scheduleStartTime),
         endTime: endTime ? formatTime(endTime) : null,
-        duration: parseInt(scheduleDuration),
+        duration: parseInt(scheduleDuration, 10),
         description: scheduleDescription,
         createdAt: new Date().toISOString()
       };
@@ -372,7 +372,7 @@ export default function InstructorDashboard({ onLogout }) {
     if (!startTime || !duration) return null;
     
     const start = new Date(startTime);
-    const durationMinutes = parseInt(duration);
+    const durationMinutes = parseInt(duration, 10);
     
     if (isNaN(durationMinutes)) return null;
     
@@ -381,14 +381,14 @@ export default function InstructorDashboard({ onLogout }) {
   };
 
   // Picker change handlers
-  const onDateChange = (event, selectedDate) => {
+  const onDateChange = (event, selectedDateValue) => {
     // Hide the picker first
     setShowDatePicker(false);
     
-    // Only update if we have a valid selectedDate and it's not a dismissal
-    if (event.type === 'set' && selectedDate) {
+    // Only update if we have a valid selectedDateValue and it's not a dismissal
+    if (event.type === 'set' && selectedDateValue) {
       // Create a new date object using device local timezone
-      const localDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+      const localDate = new Date(selectedDateValue.getFullYear(), selectedDateValue.getMonth(), selectedDateValue.getDate());
       setScheduleDate(localDate);
     }
   };
@@ -740,17 +740,17 @@ export default function InstructorDashboard({ onLogout }) {
     return await dataService.getAttendanceStatus(studentId, targetDate, currentClass?.id);
   };
 
-  const isPresent = async (studentId, date = null) => {
+  const _isPresent = async (studentId, date = null) => {
     const status = await getAttendanceStatus(studentId, date);
     return status === 'present';
   };
 
-  const isAbsent = async (studentId, date = null) => {
+  const _isAbsent = async (studentId, date = null) => {
     const status = await getAttendanceStatus(studentId, date);
     return status === 'absent';
   };
 
-  const isNotMarked = async (studentId, date = null) => {
+  const _isNotMarked = async (studentId, date = null) => {
     const status = await getAttendanceStatus(studentId, date);
     return status === 'not_marked';
   };
@@ -867,7 +867,7 @@ export default function InstructorDashboard({ onLogout }) {
     });
     
     return marked;
-  }, [selectedDate, scheduledDates, attendance, students, currentClass]);
+  }, [selectedDate, scheduledDates, attendance, students]);
 
   const onDayPress = async (day) => {
     const newDate = day.dateString;
@@ -895,7 +895,7 @@ export default function InstructorDashboard({ onLogout }) {
     return date.toLocaleDateString();
   };
 
-  const renderClassItem = ({ item }) => {
+  const _renderClassItem = ({ item }) => {
     // Get student count for this class from the state
     const studentCount = classStudentCounts[item.id] || 0;
     
@@ -1028,7 +1028,7 @@ export default function InstructorDashboard({ onLogout }) {
   const renderScheduleItem = ({ item }) => {
     // Check if this schedule has attendance marked
     const hasAttendance = Object.keys(attendance).some(key => {
-      const [studentId, date] = key.split('_');
+      const [, date] = key.split('_');
       return date === item.date;
     });
 
@@ -1196,9 +1196,9 @@ export default function InstructorDashboard({ onLogout }) {
       {currentClass ? (
         <View style={styles.selectedClassHeader}>
           <View style={styles.classHeaderRow}>
-            <View style={styles.classInfo}>
+            <View style={styles.selectedClassInfo}>
               <Text style={styles.selectedClassTitle}>Selected Class:</Text>
-              <Text style={styles.selectedClassName}>{currentClass.name}</Text>
+              <Text style={styles.selectedClassDetailName}>{currentClass.name}</Text>
               {currentClass.description && (
                 <Text style={styles.selectedClassDescription}>{currentClass.description}</Text>
               )}
@@ -2198,9 +2198,9 @@ export default function InstructorDashboard({ onLogout }) {
                               status === 'present' && styles.attendancePresentButton
                             ]}
                             onPress={() => {
-                              const attendanceKey = `${item.id}_${modalSelectedDate}`;
+                              const key = `${item.id}_${modalSelectedDate}`;
                               const newAttendance = { ...attendance };
-                              newAttendance[attendanceKey] = true;
+                              newAttendance[key] = true;
                               setAttendance(newAttendance);
                               dataService.saveAttendance(newAttendance);
                               setScheduleListKey(prev => prev + 1);
@@ -2218,9 +2218,9 @@ export default function InstructorDashboard({ onLogout }) {
                               status === 'absent' && styles.attendanceAbsentButton
                             ]}
                             onPress={() => {
-                              const attendanceKey = `${item.id}_${modalSelectedDate}`;
+                              const key = `${item.id}_${modalSelectedDate}`;
                               const newAttendance = { ...attendance };
-                              newAttendance[attendanceKey] = false;
+                              newAttendance[key] = false;
                               setAttendance(newAttendance);
                               dataService.saveAttendance(newAttendance);
                               setScheduleListKey(prev => prev + 1);
@@ -2238,9 +2238,9 @@ export default function InstructorDashboard({ onLogout }) {
                               styles.attendanceNotMarkedButton
                             ]}
                             onPress={() => {
-                              const attendanceKey = `${item.id}_${modalSelectedDate}`;
+                              const key = `${item.id}_${modalSelectedDate}`;
                               const newAttendance = { ...attendance };
-                              delete newAttendance[attendanceKey];
+                              delete newAttendance[key];
                               setAttendance(newAttendance);
                               dataService.saveAttendance(newAttendance);
                               setScheduleListKey(prev => prev + 1);
@@ -2753,7 +2753,7 @@ const styles = StyleSheet.create({
     color: '#2e7d32',
     marginBottom: 4,
   },
-  selectedClassName: {
+  selectedClassDetailName: {
     fontSize: 20,
     fontWeight: '700',
     color: '#1b5e20',
@@ -2794,7 +2794,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  classInfo: {
+  selectedClassInfo: {
     flex: 1,
   },
   changeClassButton: {
@@ -3186,7 +3186,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: '#f8f9fa',
   },
-  messageInput: {
+  messageTextAreaInput: {
     height: 100,
     textAlignVertical: 'top',
   },

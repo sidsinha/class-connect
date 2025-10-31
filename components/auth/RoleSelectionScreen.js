@@ -81,7 +81,7 @@ export default function RoleSelectionScreen({ onRoleSelected }) {
       >
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Image source={require('../assets/logo.png')} style={styles.logo} />
+            <Image source={require('../../assets/logo.png')} style={styles.logo} />
           </View>
           <Text style={styles.title}>Welcome to ClassConnect Pro</Text>
           <Text style={styles.subtitle}>Choose your role to get started</Text>

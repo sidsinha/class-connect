@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
+
 import {
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  View,
-  FlatList,
   TouchableOpacity,
-  StatusBar,
-  RefreshControl,
-  Alert,
-  ScrollView,
-  Image
+  View
 } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
-import dataService from '../dataService';
+
 import authService from '../authService';
-import StudentProfile from './StudentProfile';
+import dataService from '../dataService';
+
+import ClassInvitations from './student/invitations';
+import StudentProfile from './student/StudentProfile';
 
 export default function StudentDashboard({ onLogout }) {
   const [classes, setClasses] = useState([]);
@@ -28,11 +31,12 @@ export default function StudentDashboard({ onLogout }) {
   const [showSchedulesScreen, setShowSchedulesScreen] = useState(false);
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [activeTab, setActiveTab] = useState('messages');
-  const [studentName, setStudentName] = useState('Student');
+  const [_studentName, setStudentName] = useState('Student');
 
   useEffect(() => {
     loadStudentData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // loadStudentData is stable and doesn't need to be in deps
 
   const loadStudentData = async () => {
     try {
@@ -122,7 +126,7 @@ export default function StudentDashboard({ onLogout }) {
         </Text>
       </View>
       <Text style={styles.messageContent}>{item.content}</Text>
-      <Text style={styles.instructorName}>- {item.instructorName}</Text>
+      <Text style={styles.messageInstructorName}>- {item.instructorName}</Text>
     </View>
   );
 
@@ -358,34 +362,11 @@ export default function StudentDashboard({ onLogout }) {
         showsVerticalScrollIndicator={false}
       >
         {/* Pending Invitations Section */}
-        {pendingInvitations.length > 0 && (
-          <View style={styles.invitationsSection}>
-            <Text style={styles.sectionTitle}>📨 Class Invitations</Text>
-            {pendingInvitations.map((invitation) => (
-              <View key={invitation.id} style={styles.invitationCard}>
-                <View style={styles.invitationHeader}>
-                  <Text style={styles.invitationTitle}>{invitation.className}</Text>
-                  <Text style={styles.invitationInstructor}>by {invitation.instructorName}</Text>
-                </View>
-                <Text style={styles.invitationMessage}>{invitation.message}</Text>
-                <View style={styles.invitationActions}>
-                  <TouchableOpacity
-                    style={styles.declineButton}
-                    onPress={() => declineInvitation(invitation)}
-                  >
-                    <Text style={styles.declineButtonText}>Decline</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.acceptButton}
-                    onPress={() => acceptInvitation(invitation)}
-                  >
-                    <Text style={styles.acceptButtonText}>Accept</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
+        <ClassInvitations
+          invitations={pendingInvitations}
+          onAccept={acceptInvitation}
+          onDecline={declineInvitation}
+        />
 
         {classes.length === 0 ? (
           <View style={styles.emptyContainer}>
@@ -755,7 +736,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 10,
   },
-  instructorName: {
+  messageInstructorName: {
     fontSize: 14,
     color: '#007AFF',
     fontWeight: '500',
